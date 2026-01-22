@@ -116,7 +116,7 @@ MERN is chosen for this project because it is widely used, has an active communi
 - Executes the user’s code against test cases and generates verdicts.
 - Reports verdicts and execution metadata back to the backend, which stores them in the database.
 
-#### Message Queue (optional but recommended)
+#### Message Queue (optional in v1)
 
 - Sits between backend and judge workers.
 - Smooths out spikes when many submissions arrive at the same time.
@@ -138,7 +138,7 @@ MERN is chosen for this project because it is widely used, has an active communi
 
 - `_id`
 - `title`
-- `code` (short identifier like `TWO_SUM`)
+- `code`/`Tags` (short identifier like `TWO_SUM`)
 - `statement` (description)
 - `difficulty` (for example, `Easy` / `Medium` / `Hard`)
 - `created_at`
@@ -149,14 +149,14 @@ MERN is chosen for this project because it is widely used, has an active communi
 - `problem_id` (reference to `problems._id`)
 - `input` (string)
 - `expected_output` (string)
-- `is_sample` (boolean flag for sample vs hidden)
+- `is_sample` (boolean flag for sample vs hidden testcases)
 
 ### submissions
 
 - `_id`
 - `user_id` (reference to `users._id`)
 - `problem_id` (reference to `problems._id`)
-- `language` (fixed: `Java` in v1)
+- `language` (fixed for now, `Java` in v1)
 - `source_code`
 - `verdict` (for example, `Accepted`, `Wrong Answer`, `Runtime Error`, `Time Limit Exceeded`)
 - `execution_time_ms` (optional)
