@@ -1,8 +1,28 @@
-// Fields
-// username – string, required, unique.
+import mongoose from 'mongoose';
 
-// email – string, required, unique.
+const userSchema = new mongoose.Schema({
+    username: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true,
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+    },
+    passwordhash: {
+        type: String,
+        required: true,
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,//default value is the current date and time.
+    }
+});
 
-// passwordHash – string, required.
+const User = mongoose.model('User', userSchema);
 
-// createdAt – date, default now.
+export default User; //xports the model so you we can import it elsewhere
