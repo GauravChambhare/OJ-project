@@ -90,6 +90,7 @@ const existingUser = await User.findOne({
     - Verifies the token using the secret
     - Throws an error if invalid/expired
     - Returns the decoded payload if valid
+- If your Node is not using ES modules by default, add `"type": "module"` in `package.json` or convert the imports to require.
 ---
 
 ### Remember

@@ -12,6 +12,11 @@ dotenv.config({ path: join(__dirname, '.env') });
 import { dbConnection } from './config/db.js';
 import express from 'express';
 import authRouter from './routes/auth.js';
+import judgeRouter from './routes/judge.js';
+import submissionsRouter from './routes/submissions.js';
+import problemsRouter from './routes/problems.js';
+
+
 
 const app = express();
 app.use(cors());
@@ -24,8 +29,11 @@ const PORT = process.env.PORT || 5000;
 app.get('/', (req, res) => {
     res.send('Server run hora hai!');
 });
-
+// mounting routers in server/routes/ dir
 app.use('/api/auth', authRouter);
+app.use('/api/judge', judgeRouter);
+app.use('/api/submissions', submissionsRouter);
+app.use('/api/problems', problemsRouter);
 
 // Start server after routes are registered
 async function startServer() {

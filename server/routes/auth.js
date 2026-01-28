@@ -134,6 +134,54 @@ authRouter.get('/profile', authMiddleware, async (req, res) => {
 });
 
 
+authRouter.post('/reset-password', authMiddleware, async (req, res) => {
+    try {
+      const { oldPassword, newPassword } = req.body;
+  
+      // Validate input
+      if (!oldPassword || !newPassword) {
+        return res.status(400).json({ message: 'Old and new passwords are required' });
+      }
+  
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: 'New password must be at least 8 characters long' });
+      }
+  
+      // Find current user from JWT payload
+      const userId = req.user.userId; // you already set this in auth middleware
+      const user = await User.findById(userId); //line 3 pe import le liya hai model ka apan-ne
+
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+        
+      if (!oldPassword) {
+        console.error('reset-password: missing oldPassword in body');
+        return res.status(400).json({ message: 'Old password is required' });
+      }
+
+      if (!user.passwordhash) {
+        console.error('reset-password: user.passwordhash is missing for user', user._id);
+        return res.status(500).json({ message: 'Password not set for this user' });
+      }  
+      // Check old password
+      const isMatch = await bcrypt.compare(oldPassword, user.passwordhash);
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Old password is incorrect' });
+      }
+  
+      // Hash and save new password
+      const hashed = await bcrypt.hash(newPassword, 10);
+      user.passwordhash = hashed;
+      await user.save();
+  
+      return res.status(200).json({ message: 'Password updated successfully' });
+    } catch (err) {
+      console.error('Error in reset-password:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 export default authRouter; // without this, we will not be able to import it in any other .js file.
 
 
