@@ -6,7 +6,7 @@ const submissionSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     problemId: { type: Schema.Types.ObjectId, ref: 'Problem', required: true },
-    language: { type: String, required: true }, // v1 me filhal java
+    language: { type: String, required: true }, // java, c++, js and python support karta hai
     sourceCode: { type: String, required: true }, //ye user submited code hai
     verdict: { type: String, default: 'Pending' },
     executionTimeMs: { type: Number },

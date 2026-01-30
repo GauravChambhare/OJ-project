@@ -107,3 +107,30 @@ How to run below commands
 npm create vite@latest client
 ```
 then enter --> react --> js
+
+---
+
+#### Below are some different but important methods on how to build Docker images.
+
+1. `docker build --no-cache -t my-image:nocache .` 
+It's especially useful if we want to create new image from scratch because normally if an image has been build next time when Docker tries to build same image from same Docker file it will use the earlier cached downloaded data and files.
+2. `docker build -t my-image:latest .` here 
+    
+    a. *latest* is the tag associcated with this build. 
+    
+    b. *my-image* is name for this particular image
+    
+    c. `.` is the context path i,e to tell docker where to consider root for taking objects from while we are building the image. In this case `.` tell docker to use current directory as context path.
+3. `docker tag my-image:latest myuser/my-image:v1
+docker push myuser/my-image:v1
+`
+After building image, we can re‑tag and push  it to dockerhub.
+    d. 'docker ps'
+
+
+---
+####
+
+
+docker run --rm -v /path/to/tempdir:/runner oj-runner:30-jan:30jan-v1 \
+  /runner/run.sh python main.py input.txt
