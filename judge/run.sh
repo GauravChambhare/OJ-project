@@ -1,8 +1,6 @@
 #!/bin/sh
 # Usage: ./run.sh <language> <source_file> <input_file>
-# So overall, this will take a language, a source file, and an input file as parameters while it is running. Based on the 
-# language, it will run different compilers/ interpreters as defined in the below logic flow.
-# filhal debugging chalu hai script ki.
+
 set -eu
 
 LANGUAGE="$1"
@@ -18,8 +16,8 @@ fi
 case "$LANGUAGE" in
   java)
     # Expect Main.java
-    if ! javac "$SRC_FILE" 2> compile.err; then
-      cat compile.err >&2
+    if ! javac "$SRC_FILE" 2> /tmp/compile.err; then
+      cat /tmp/compile.err >&2
       exit 100  # compilation error
     fi
     if ! java Main < "$INPUT_FILE"; then
@@ -34,12 +32,12 @@ case "$LANGUAGE" in
     ;;
 
   cpp|c++|gpp)
-    # Compile to ./main
-    if ! g++ "$SRC_FILE" -O2 -std=c++17 -o main 2> compile.err; then
-      cat compile.err >&2
+    # Compile to /tmp/main
+    if ! g++ "$SRC_FILE" -O2 -std=c++17 -o /tmp/main 2> /tmp/compile.err; then
+      cat /tmp/compile.err >&2
       exit 100
     fi
-    if ! ./main < "$INPUT_FILE"; then
+    if ! /tmp/main < "$INPUT_FILE"; then
       exit 101
     fi
     ;;

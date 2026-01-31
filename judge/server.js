@@ -33,7 +33,7 @@ function createTempDir() {
 //2 sec ka hard timelimit deraha hai ek docker image run karke finish hone ko per testcase.
 function runInDocker({ language, srcPath, inputPath, timeLimitMs = 2000  }) { 
   return new Promise((resolve, reject) => { //ek promise create karna padega to handle this async task.
-    const image = 'oj-runner:30-jan'; //filhal idhar hardcode kiya hai,  if needed in future we can read the same from an .env file
+    const image = 'oj-runner:31-jan'; //filhal idhar hardcode kiya hai,  if needed in future we can read the same from an .env file
 
     const workDirOnHost = path.dirname(srcPath);
     const workDirInContainer = '/runner/work';
