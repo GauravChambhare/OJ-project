@@ -80,7 +80,15 @@ authRouter.post('/login', async (req, res) => {
             userId: user._id,
             username: user.username
         };        
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign(
+            {
+              userId: user._id.toString(),
+              username: user.username,
+              isAdmin: user.isAdmin || false,
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '3h' }
+          );
         /* ye kya karra hai niche hai
         payload contains data to encode in the token
         user._id is the MongoDB document ID
@@ -94,7 +102,8 @@ authRouter.post('/login', async (req, res) => {
             user: {
                 id: user._id,
                 username: user.username,
-                email: user.email
+                email: user.email,
+                isAdmin: user.isAdmin || false
             }
         });
 

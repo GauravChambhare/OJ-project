@@ -15,7 +15,7 @@ import authRouter from './routes/auth.js';
 import judgeRouter from './routes/judge.js';
 import submissionsRouter from './routes/submissions.js';
 import problemsRouter from './routes/problems.js';
-
+import adminProblemsRouter from './routes/adminProblems.js';
 
 
 const app = express();
@@ -34,6 +34,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/judge', judgeRouter);
 app.use('/api/submissions', submissionsRouter);
 app.use('/api/problems', problemsRouter);
+app.use('/api/admin/problems', adminProblemsRouter);
 
 // Start server after routes are registered
 async function startServer() {

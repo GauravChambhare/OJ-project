@@ -76,13 +76,15 @@ router.post('/', authMiddleware, async (req, res) => {
 
     return res.status(201).json({
       id: submission._id,
-      problemId: submission.problemId,      
+      problemId: submission.problemId,
       language: submission.language,
       verdict: submission.verdict,
       timeMs: submission.executionTimeMs,
       memoryKb: submission.memoryUsedKb,
       createdAt: submission.submittedAt,
-    });
+      stdout: submission.stdout || '', // if no output then keep empty space
+      stderr: submission.stderr || '',
+    });    
   } catch (err) {
     console.error('Error in POST /api/submissions:', err);
     return res.status(500).json({ message: 'Internal server error' });
@@ -143,17 +145,18 @@ router.get('/:id', authMiddleware, async (req, res) => {
       return res.status(403).json({ message: 'Forbidden' });
     }
 
-    return res.json(
-      submissions.map(sub => ({
-        id: sub._id,
-        problemId: sub.problemId,
-        language: sub.language,
-        verdict: sub.verdict,
-        timeMs: sub.executionTimeMs,   
-        memoryKb: sub.memoryUsedKb,
-        createdAt: sub.submittedAt,
-      }))
-    );
+    return res.json({
+      id: sub._id,
+      problemId: sub.problemId,
+      language: sub.language,
+      verdict: sub.verdict,
+      timeMs: sub.executionTimeMs,
+      memoryKb: sub.memoryUsedKb,
+      createdAt: sub.submittedAt,
+      // sourceCode: sub.sourceCode,  //ye optional hai jarurat nahi hai final version me
+      stdout: sub.stdout,
+      stderr: sub.stderr,
+    });
   } catch (err) {
     console.error('Error in GET /api/submissions/:id:', err);
     return res.status(500).json({ message: 'Internal server error' });

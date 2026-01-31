@@ -30,6 +30,15 @@ commands for running express server
 
 ```bash npx nodemon server.js```
 
+or
+
+```bash npm run server.js```
+or
+```bash npm run dev```
+
+for react code run below in `client`
+```bash npm run dev```
+
 ##### node_modules folder
 ---
 
@@ -129,8 +138,6 @@ After building image, we can re‑tag and push  it to dockerhub.
 
 
 ---
-####
+#### We need to run below command for running the images
 
-
-docker run --rm -v /path/to/tempdir:/runner oj-runner:30-jan:30jan-v1 \
-  /runner/run.sh python main.py input.txt
+```bash: docker run --rm -v </path/to/tempdir:/runner/work> <image name>:<tag> \ /runner/run.sh <language> <code file> <testcase file>```
