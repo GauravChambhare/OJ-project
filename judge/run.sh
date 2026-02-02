@@ -16,12 +16,18 @@ fi
 case "$LANGUAGE" in
   java)
     # Expect Main.java
-    if ! javac "$SRC_FILE" 2> /tmp/compile.err; then
+    SRC_DIR=$(dirname "$SRC_FILE")
+    SRC_BASENAME=$(basename "$SRC_FILE")
+
+    # Compile from the source directory
+    if ! (cd "$SRC_DIR" && javac "$SRC_BASENAME" 2> /tmp/compile.err); then
       cat /tmp/compile.err >&2
-      exit 100  # compilation error
+      exit 100 # compilation error
     fi
-    if ! java Main < "$INPUT_FILE"; then
-      exit 101  # runtime error
+
+    # Run from the same directory so `Main` is on the classpath
+    if ! (cd "$SRC_DIR" && java Main < "$INPUT_FILE"); then
+      exit 101 # runtime error
     fi
     ;;
 

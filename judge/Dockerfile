@@ -15,8 +15,8 @@ RUN apt-get update && \
 RUN useradd -m runner
 WORKDIR /runner
 
-# Copy runner script into image
 COPY run.sh /runner/run.sh
+COPY runner.js /runner/runner.js
 RUN chmod +x /runner/run.sh
 
 # Default user inside container

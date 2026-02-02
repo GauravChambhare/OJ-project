@@ -5,18 +5,19 @@
 `./configs/setup.sh`
 
 ##### Alternative 1
-`cd OJ-project/configs`
+```bash
+cd OJ-project/configs
 
-`chmod +x setup.sh`
+chmod +x setup.sh
 
-`./setup.sh`
-
+./setup.sh
+```
 ##### Alternative 2
+```bash
+chmod +x configs/setup.sh
 
-`chmod +x configs/setup.sh`
-
-`./configs/setup.sh`
-
+./configs/setup.sh
+```
 ### NOTE: for running setup.sh
 
 ```text
@@ -28,16 +29,24 @@ Install all backend deps in one go.
 ```
 commands for running express server
 
-```bash npx nodemon server.js```
+```bash 
+npx nodemon server.js
+```
 
 or
 
-```bash npm run server.js```
+```bash
+ npm run server.js
+ ```
 or
-```bash npm run dev```
+```bash
+ npm run dev
+ ```
 
-for react code run below in `client`
-```bash npm run dev```
+for react code run below in `vite` project (`client`)
+```bash
+ npm run dev
+ ```
 
 ##### node_modules folder
 ---
@@ -119,7 +128,7 @@ then enter --> react --> js
 
 ---
 
-#### Below are some different but important methods on how to build Docker images.
+#### Below are some different but important methods on how to work Docker images.
 
 1. `docker build --no-cache -t my-image:nocache .` 
 It's especially useful if we want to create new image from scratch because normally if an image has been build next time when Docker tries to build same image from same Docker file it will use the earlier cached downloaded data and files.
@@ -135,9 +144,45 @@ docker push myuser/my-image:v1
 `
 After building image, we can re‑tag and push  it to dockerhub.
     d. 'docker ps'
+4. `docker images` shows all images currently stored on local system
+5. `docker login` logs to dockerhub account, it will ask for username and password if it is not stored in cache memory.
+6. `docker tag <original image>:<its tag> <username>/<new name>:<new tag>` this will retag the exisiting image on local as new name and new tag [we can keep their original values if needed] to prepare it to be pushed to remote.
+7. `docker push <username>/<new image>:<new tag>` will push the image to remote.
+8. `docker pull <username>/<new image>:<new tag>` to later pull an image from remote we can run this command.
+9.  -  Remove by image ID `docker rmi <image id>`.
+    - Remove by repository:tag `docker rmi <repository>:<tag>`.
 
+10. Entering container in interactive mode `docker run --rm -it --entrypoint /bin/sh oj-runner:1-feb`.
+
+[More details on removing, prunning docker images from local](https://www.datacamp.com/tutorial/docker-remove-image)
 
 ---
 #### We need to run below command for running the images
 
-```bash: docker run --rm -v </path/to/tempdir:/runner/work> <image name>:<tag> \ /runner/run.sh <language> <code file> <testcase file>```
+```bash
+ docker run --rm -v </path/to/tempdir:/runner/work> <image name>:<tag> \ /runner/run.sh <language> <code file> <testcase file>
+ ```
+
+---
+#### To kill all processes relevant to our project we need to run either of these below commands
+
+```bash
+
+# stop all docker containers
+docker stop $(docker ps -aq)
+
+# kill all node processes
+pkill -f node
+
+# Kill judge service
+pkill -f "judge/server.js"
+
+# Kill main backend
+pkill -f "server/server.js"
+
+# Kill Vite dev server (frontend)
+pkill -f "vite"
+
+# all in one command
+docker stop $(docker ps -aq) && pkill -f node
+```

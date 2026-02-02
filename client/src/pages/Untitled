@@ -1,0 +1,156 @@
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+
+function ProblemSubmissionsPage() {
+  const { code } = useParams();
+  const [submissions, setSubmissions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function load() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setError("You must be logged in to view submissions.");
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch(
+          `http://localhost:3000/api/submissions?problemCode=${encodeURIComponent(
+            code
+          )}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await res.json().catch(() => null);
+
+        if (res.ok && Array.isArray(data)) {
+          setSubmissions(data);
+        } else {
+          setError(
+            (data && (data.error || data.message)) ||
+              "Could not load submissions."
+          );
+        }
+      } catch {
+        setError("Network error while loading submissions.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    load();
+  }, [code]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-100">
+        <p className="text-sm text-slate-700">Loading submissions...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-100">
+      <div className="max-w-5xl mx-auto py-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-xl font-semibold text-slate-800">
+              My submissions for {code}
+            </h1>
+            <p className="text-xs text-slate-500">
+              History of your attempts for this problem.
+            </p>
+          </div>
+          <Link
+            to={`/problems/${code}`}
+            className="text-xs text-indigo-600 hover:text-indigo-800"
+          >
+            ← Back to problem
+          </Link>
+        </div>
+
+        {error && (
+          <p className="text-sm text-red-600 mb-3">
+            {error}
+          </p>
+        )}
+
+        {submissions.length === 0 && !error ? (
+          <p className="text-sm text-slate-600">
+            You have not submitted any solutions for this problem yet.
+          </p>
+        ) : (
+          <div className="bg-white shadow rounded-lg overflow-hidden">
+            <table className="min-w-full text-xs">
+              <thead className="bg-slate-50">
+                <tr>
+                  <th className="px-3 py-2 text-left font-medium text-slate-600">
+                    #
+                  </th>
+                  <th className="px-3 py-2 text-left font-medium text-slate-600">
+                    Language
+                  </th>
+                  <th className="px-3 py-2 text-left font-medium text-slate-600">
+                    Verdict
+                  </th>
+                  <th className="px-3 py-2 text-left font-medium text-slate-600">
+                    Time (ms)
+                  </th>
+                  <th className="px-3 py-2 text-left font-medium text-slate-600">
+                    Submitted at
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {submissions.map((s, idx) => {
+                  const date = new Date(s.createdAt);
+                  const verdictColor =
+                    s.verdict === "Accepted"
+                      ? "text-emerald-600"
+                      : s.verdict === "Wrong Answer"
+                      ? "text-red-600"
+                      : "text-amber-600";
+
+                  return (
+                    <tr
+                      key={s.id}
+                      className={idx % 2 === 0 ? "bg-white" : "bg-slate-50"}
+                    >
+                      <td className="px-3 py-2 text-slate-700">
+                        {idx + 1}
+                      </td>
+                      <td className="px-3 py-2 text-slate-700">
+                        {s.language}
+                      </td>
+                      <td className={`px-3 py-2 font-medium ${verdictColor}`}>
+                        {s.verdict}
+                      </td>
+                      <td className="px-3 py-2 text-slate-700">
+                        {s.timeMs}
+                      </td>
+                      <td className="px-3 py-2 text-slate-500">
+                        {date.toLocaleString()}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default ProblemSubmissionsPage;
