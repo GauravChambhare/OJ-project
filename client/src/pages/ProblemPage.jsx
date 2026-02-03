@@ -46,6 +46,12 @@ function ProblemPage() {
     return saved ? Number(saved) : DEFAULT_LEFT_WIDTH;
   });
 
+  // AI review functionality state 
+  const [lastSubmissionId, setLastSubmissionId] = useState(null);
+  const [aiReview, setAiReview] = useState('');
+  const [isRequestingReview, setIsRequestingReview] = useState(false);
+  const [aiReviewError, setAiReviewError] = useState('');
+
   // Persist split position to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem(SPLIT_POSITION_KEY, leftWidth.toString());
@@ -156,6 +162,8 @@ function ProblemPage() {
     setMode(null);
     setIsSubmitting(true);
     setIsRunning(false);
+    setLastSubmissionId(null);
+    setAiReview('');
 
     try {
       const token = localStorage.getItem('token');
@@ -186,6 +194,7 @@ function ProblemPage() {
         setStdout(data.stdout);
         setStderr(data.stderr);
         setTests(Array.isArray(data.tests) ? data.tests : []);
+        setLastSubmissionId(data.id);
       } else {
         setError((data && (data.error || data.message)) || 'Submit failed.');
       }
@@ -195,6 +204,51 @@ function ProblemPage() {
       setIsSubmitting(false);
     }
   }
+
+  async function handleAiReview() {
+    if (!lastSubmissionId) {
+      setAiReviewError('No submission to review');
+      return;
+    }
+
+    setIsRequestingReview(true);
+    setAiReviewError('');
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setAiReviewError('You must be logged in');
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:3000/api/ai/review/${lastSubmissionId}`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json().catch(() => null);
+
+      if (response.ok && data) {
+        setAiReview(data.review);
+        setAiReviewError('');
+      } else {
+        setAiReviewError(
+          (data && (data.error || data.message)) ||
+          'Failed to get AI review. Try again later.'
+        );
+      }
+    } catch {
+      setAiReviewError('Network error while requesting AI review.');
+    } finally {
+      setIsRequestingReview(false);
+    }
+  }
+
 
   function handleDividerMouseDown(e) {
     e.preventDefault();
@@ -382,12 +436,21 @@ function ProblemPage() {
               </button>
               <button
                 type="button"
-                disabled
-                title="Coming soon"
-                className="rounded bg-emerald-800/40 text-emerald-100/70 px-4 py-2 text-sm font-medium cursor-not-allowed"
+                onClick={handleAiReview}
+                disabled={!lastSubmissionId || isRequestingReview || !!aiReview}
+                className={
+                  lastSubmissionId && !aiReview
+                    ? 'rounded bg-emerald-600 text-white px-4 py-2 text-sm font-medium hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed'
+                    : 'rounded bg-emerald-800/40 text-emerald-100/70 px-4 py-2 text-sm font-medium cursor-not-allowed'
+                }
               >
-                AI review
+                {isRequestingReview
+                  ? 'Generating review...'
+                  : aiReview
+                    ? 'Reviewed ✓'
+                    : 'AI review'}
               </button>
+
             </div>
 
             <p className="text-sm font-semibold text-slate-700 mb-1">Output</p>
@@ -502,7 +565,28 @@ function ProblemPage() {
                   </span>
                 )}
             </div>
-          </div>
+          </div> {/* End of output div */}
+
+          {/* AI Review Section - inside right pane, below output */}
+          {aiReview && (
+            <div className="px-4 pb-3">
+              <div className="bg-emerald-50 border border-emerald-200 rounded p-4">
+                <h3 className="text-sm font-semibold text-emerald-900 mb-2 flex items-center gap-2">
+                  <span>🤖</span>
+                  <span>AI Code Review</span>
+                </h3>
+                <div className="text-sm text-slate-800 whitespace-pre-wrap leading-relaxed">
+                  {aiReview}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {aiReviewError && (
+            <div className="px-4 pb-3">
+              <p className="text-sm text-red-600">{aiReviewError}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

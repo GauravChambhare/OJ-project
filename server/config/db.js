@@ -6,18 +6,20 @@ Notes for self,
 1. Mongoose's connect() is asynchronous.
 2. we are using async function to connect to the database because we are using await keyword to wait for the database to connect.
 */
-export async function dbConnection() {
+// server/config/db.js
 
-    const MONGODB_URI = process.env.MONGODB_URI;
-    if(MONGODB_URI===null || MONGODB_URI===undefined){
-        throw new Error("MONGODB_URI is not set");
-    }
-    
-    try {
-        await mongoose.connect(MONGODB_URI);
-        console.log("Connected to MongoDB");
-    } catch (error) {
-        console.error("Error connecting to MongoDB", error);
-    }
-}
+const dbConnection = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+    });
+    console.log('MongoDB connected successfully');
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+  }
+};
+
+export default dbConnection;
+
 //log process
