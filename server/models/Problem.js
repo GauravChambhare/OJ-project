@@ -6,8 +6,11 @@ const problemSchema = new Schema(
   {
     number: { type: Number, required: true, unique: true }, 
     title: { type: String, required: true },
-    code: { type: String, required: true, unique: true },   
-    statement: { type: String, required: true },
+    code: { type: String, required: true, unique: true },
+    statement: { type: String },
+    statementMarkdown: { type: String },
+    constraintsMarkdown: { type: String },
+    editorialMarkdown: { type: String },
     difficulty: {
       type: String,
       enum: ['Easy', 'Medium', 'Hard'],

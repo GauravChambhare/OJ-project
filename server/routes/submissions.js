@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import axios from 'axios';
-import authMiddleware from '../middleware/auth.js';
+import authMiddleware, { requireAdmin } from '../middleware/auth.js';
 import Submission from '../models/Submission.js';
 import Problem from '../models/Problem.js';
 import TestCase from '../models/TestCase.js';
@@ -163,6 +163,91 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// ADMIN ke liye api hai: list submissions with filters
+// GET /api/submissions/admin?userId=&problemCode=&verdict=&language=&limit=&page=
+router.get('/admin', authMiddleware, requireAdmin, async (req, res) => {
+  try {
+    const { userId, problemCode, verdict, language, limit = 50, page = 1 } = req.query;
+
+    const filter = {};
+
+    if (userId) {
+      filter.userId = userId;
+    }
+
+    if (problemCode) {
+      const problem = await Problem.findOne({ code: problemCode });
+      if (!problem) {
+        return res.json({ items: [], total: 0 });
+      }
+      filter.problemId = problem._id;
+    }
+
+    if (verdict) {
+      filter.verdict = verdict;
+    }
+
+    if (language) {
+      filter.language = language;
+    }
+
+    const perPage = Math.min(Number(limit) || 50, 100);
+    const skip = (Number(page) - 1) * perPage;
+
+    const [items, total] = await Promise.all([
+      Submission.find(filter)
+        .sort({ submittedAt: -1 })
+        .skip(skip)
+        .limit(perPage),
+      Submission.countDocuments(filter),
+    ]);
+
+    const result = items.map(sub => ({
+      id: sub._id,
+      userId: sub.userId,
+      problemId: sub.problemId,
+      language: sub.language,
+      verdict: sub.verdict,
+      timeMs: sub.executionTimeMs,
+      memoryKb: sub.memoryUsedKb,
+      createdAt: sub.submittedAt,
+    }));
+
+    res.json({ items, total, page: Number(page), limit: perPage, data: result });
+  } catch (err) {
+    console.error('Error in GET /api/submissions/admin:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ADMIN ke liye api: get full details of any submission
+// GET /api/submissions/admin/:id
+router.get('/admin/:id', authMiddleware, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const sub = await Submission.findById(id);
+    if (!sub) {
+      return res.status(404).json({ error: 'Submission not found' });
+    }
+
+    return res.json({
+      id: sub._id,
+      userId: sub.userId,
+      problemId: sub.problemId,
+      language: sub.language,
+      verdict: sub.verdict,
+      timeMs: sub.executionTimeMs,
+      memoryKb: sub.memoryUsedKb,
+      createdAt: sub.submittedAt,
+      stdout: sub.stdout,
+      stderr: sub.stderr,
+      sourceCode: sub.sourceCode,
+    });
+  } catch (err) {
+    console.error('Error in GET /api/submissions/admin/:id:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 
 export default router;

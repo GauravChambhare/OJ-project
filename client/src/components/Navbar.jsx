@@ -1,3 +1,4 @@
+// client/src/components/Navbar.jsx
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
@@ -13,6 +14,8 @@ function Navbar() {
       } catch {
         setUser(null);
       }
+    } else {
+      setUser(null);
     }
   }, []);
 
@@ -22,66 +25,47 @@ function Navbar() {
     navigate('/login');
   }
 
-  const isAdmin = user?.role === 'admin'; // adjust if the user has a different admin flag , we want this for implementing crud for probelems and testcases
+  // Safely check admin status - handle both isAdmin boolean and role string
+  const isAdmin = user?.isAdmin === true || user?.role === 'admin';
 
   return (
-    <nav className="bg-slate-900 text-white">
-      <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link
-            to="/"
-            className="text-sm font-semibold text-indigo-300 hover:text-indigo-200"
-          >
-            OJ Lite
+    <nav className="flex items-center justify-between px-4 py-2 border-b">
+      <div className="flex items-center gap-4">
+        <Link to="/" className="font-semibold">
+          OJ Lite
+        </Link>
+        <Link to="/problems">Problems</Link>
+
+        {isAdmin && (
+          <Link to="/admin/problems" className="text-red-600">
+            Admin
           </Link>
-          <Link
-            to="/problems"
-            className="text-xs text-slate-200 hover:text-white"
-          >
-            Problems
-          </Link>
-          {isAdmin && (
-            <Link
-              to="/admin/problems"
-              className="text-xs text-slate-200 hover:text-white"
-            >
-              Admin
+        )}
+      </div>
+
+      <div className="flex items-center gap-4">
+        {user ? (
+          <>
+            <Link to="/profile" className="text-sm text-slate-800">
+              {user.username || user.email}
             </Link>
-          )}
-        </div>
-        <div className="flex items-center gap-3">
-          {user ? (
-            <>
-              <Link
-                to="/profile"
-                className="text-xs text-slate-200 hover:text-white"
-              >
-                {user.username || user.email}
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="text-xs bg-red-500 hover:bg-red-600 px-2 py-1 rounded"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                to="/login"
-                className="text-xs text-slate-200 hover:text-white"
-              >
-                Login
-              </Link>
-              <Link
-                to="/signup"
-                className="text-xs text-slate-200 hover:text-white"
-              >
-                Signup
-              </Link>
-            </>
-          )}
-        </div>
+            <button
+              onClick={handleLogout}
+              className="text-sm px-3 py-1 rounded border border-slate-300 text-slate-700 hover:bg-slate-100"
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/login" className="text-sm">
+              Login
+            </Link>
+            <Link to="/signup" className="text-sm">
+              Signup
+            </Link>
+          </>
+        )}
       </div>
     </nav>
   );

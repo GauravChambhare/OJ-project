@@ -1,12 +1,11 @@
+// client/src/pages/AdminProblemsPage.jsx
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-
 
 function AdminProblemsPage() {
   const [problems, setProblems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
   const [form, setForm] = useState({
     id: null,
     number: '',
@@ -14,6 +13,9 @@ function AdminProblemsPage() {
     title: '',
     difficulty: 'Easy',
     statement: '',
+    statementMarkdown: '',
+    constraintsMarkdown: '',
+    editorialMarkdown: '',
   });
   const [saving, setSaving] = useState(false);
 
@@ -66,6 +68,9 @@ function AdminProblemsPage() {
       title: '',
       difficulty: 'Easy',
       statement: '',
+      statementMarkdown: '',
+      constraintsMarkdown: '',
+      editorialMarkdown: '',
     });
   }
 
@@ -76,7 +81,10 @@ function AdminProblemsPage() {
       code: p.code,
       title: p.title,
       difficulty: p.difficulty,
-      statement: p.statement,
+      statement: p.statement || '',
+      statementMarkdown: p.statementMarkdown || '',
+      constraintsMarkdown: p.constraintsMarkdown || '',
+      editorialMarkdown: p.editorialMarkdown || '',
     });
   }
 
@@ -98,6 +106,9 @@ function AdminProblemsPage() {
       title: form.title,
       difficulty: form.difficulty,
       statement: form.statement,
+      statementMarkdown: form.statementMarkdown,
+      constraintsMarkdown: form.constraintsMarkdown,
+      editorialMarkdown: form.editorialMarkdown,
     };
 
     const isEdit = !!form.id;
@@ -153,7 +164,6 @@ function AdminProblemsPage() {
         }
       );
       const data = await res.json().catch(() => null);
-
       if (res.ok) {
         await loadProblems();
       } else {
@@ -170,7 +180,10 @@ function AdminProblemsPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-100">
-        <p className="text-sm text-slate-700">Loading admin problems...</p>
+        <p className="text-sm text-slate-700">
+          Loading admin problems...
+          {error && <span className="text-red-600 ml-2">{error}</span>}
+        </p>
       </div>
     );
   }
@@ -184,7 +197,9 @@ function AdminProblemsPage() {
           </h1>
 
           {error && (
-            <p className="mb-3 text-sm text-red-600">{error}</p>
+            <p className="mb-3 text-sm text-red-600">
+              {error}
+            </p>
           )}
 
           <form onSubmit={handleSave} className="space-y-3 mb-6">
@@ -203,6 +218,7 @@ function AdminProblemsPage() {
                   className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
                 />
               </div>
+
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1">
                   Code
@@ -217,7 +233,8 @@ function AdminProblemsPage() {
                   className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
                 />
               </div>
-              <div>
+
+              <div className="md:col-span-2">
                 <label className="block text-xs font-medium text-slate-700 mb-1">
                   Title
                 </label>
@@ -231,6 +248,9 @@ function AdminProblemsPage() {
                   className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
                 />
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1">
                   Difficulty
@@ -251,7 +271,7 @@ function AdminProblemsPage() {
 
             <div>
               <label className="block text-xs font-medium text-slate-700 mb-1">
-                Statement
+                Statement (plain text)
               </label>
               <textarea
                 value={form.statement}
@@ -260,6 +280,60 @@ function AdminProblemsPage() {
                 }
                 rows={4}
                 className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1">
+                Statement (Markdown)
+              </label>
+              <textarea
+                value={form.statementMarkdown}
+                onChange={e =>
+                  setForm(f => ({
+                    ...f,
+                    statementMarkdown: e.target.value,
+                  }))
+                }
+                rows={4}
+                className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                placeholder="Markdown version of the statement (optional)"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1">
+                Constraints &amp; Sample Testcases (Markdown)
+              </label>
+              <textarea
+                value={form.constraintsMarkdown}
+                onChange={e =>
+                  setForm(f => ({
+                    ...f,
+                    constraintsMarkdown: e.target.value,
+                  }))
+                }
+                rows={4}
+                className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                placeholder="Constraints, limits, and sample IO in Markdown"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1">
+                Editorial (Markdown)
+              </label>
+              <textarea
+                value={form.editorialMarkdown}
+                onChange={e =>
+                  setForm(f => ({
+                    ...f,
+                    editorialMarkdown: e.target.value,
+                  }))
+                }
+                rows={4}
+                className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                placeholder="Editorial / solution notes (optional)"
               />
             </div>
 
@@ -297,6 +371,7 @@ function AdminProblemsPage() {
                     Code: {p.code} · Difficulty: {p.difficulty}
                   </p>
                 </div>
+
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => startEdit(p)}
@@ -310,27 +385,12 @@ function AdminProblemsPage() {
                   >
                     Delete
                   </button>
-                  <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => startEdit(p)}
-                        className="text-[11px] text-indigo-600 hover:underline"
-                    >
-                        Edit
-                    </button>
-                    <button
-                        onClick={() => handleDelete(p._id)}
-                        className="text-[11px] text-red-600 hover:underline"
-                    >
-                        Delete
-                    </button>
-                    <Link
-                        to={`/admin/problems/${p._id}/testcases`}
-                        className="text-[11px] text-slate-700 hover:underline"
-                    >
-                        Testcases
-                    </Link>
-                  </div>
-
+                  <Link
+                    to={`/admin/problems/${p._id}/testcases`}
+                    className="text-[11px] text-slate-700 hover:underline"
+                  >
+                    Manage Testcases
+                  </Link>
                 </div>
               </div>
             ))}

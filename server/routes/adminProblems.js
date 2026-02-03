@@ -1,3 +1,4 @@
+// server/routes/adminProblems.js
 import { Router } from 'express';
 import authMiddleware, { requireAdmin } from '../middleware/auth.js';
 import Problem from '../models/Problem.js';
@@ -12,21 +13,33 @@ router.get('/', authMiddleware, requireAdmin, async (req, res) => {
     res.json(problems);
   } catch (err) {
     console.error('Error in GET /api/admin/problems:', err);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // POST /api/admin/problems
 router.post('/', authMiddleware, requireAdmin, async (req, res) => {
   try {
-    const { number, code, title, statement, difficulty } = req.body;
+    let {
+      number,
+      code,
+      title,
+      statement,
+      difficulty,
+      statementMarkdown,
+      constraintsMarkdown,
+      editorialMarkdown,
+    } = req.body;
+
     if (!number || !code || !title || !statement || !difficulty) {
-      return res.status(400).json({ message: 'Missing required fields' });
+      return res.status(400).json({ error: 'Missing required fields' });
     }
+
+    number = Number(number);
 
     const existing = await Problem.findOne({ code });
     if (existing) {
-      return res.status(400).json({ message: 'Problem code already exists' });
+      return res.status(400).json({ error: 'Problem code already exists' });
     }
 
     const problem = await Problem.create({
@@ -35,12 +48,15 @@ router.post('/', authMiddleware, requireAdmin, async (req, res) => {
       title,
       statement,
       difficulty,
+      statementMarkdown: statementMarkdown || '',
+      constraintsMarkdown: constraintsMarkdown || '',
+      editorialMarkdown: editorialMarkdown || '',
     });
 
     res.status(201).json(problem);
   } catch (err) {
     console.error('Error in POST /api/admin/problems:', err);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -48,31 +64,43 @@ router.post('/', authMiddleware, requireAdmin, async (req, res) => {
 router.put('/:id', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const { number, code, title, statement, difficulty } = req.body;
+    const {
+      number,
+      code,
+      title,
+      statement,
+      difficulty,
+      statementMarkdown,
+      constraintsMarkdown,
+      editorialMarkdown,
+    } = req.body;
 
     const problem = await Problem.findById(id);
     if (!problem) {
-      return res.status(404).json({ message: 'Problem not found' });
+      return res.status(404).json({ error: 'Problem not found' });
     }
 
     if (code && code !== problem.code) {
       const exists = await Problem.findOne({ code });
       if (exists) {
-        return res.status(400).json({ message: 'Problem code already exists' });
+        return res.status(400).json({ error: 'Problem code already exists' });
       }
       problem.code = code;
     }
 
-    if (number != null) problem.number = number;
+    if (number != null) problem.number = Number(number);
     if (title != null) problem.title = title;
     if (statement != null) problem.statement = statement;
     if (difficulty != null) problem.difficulty = difficulty;
+    if (statementMarkdown != null) problem.statementMarkdown = statementMarkdown;
+    if (constraintsMarkdown != null) problem.constraintsMarkdown = constraintsMarkdown;
+    if (editorialMarkdown != null) problem.editorialMarkdown = editorialMarkdown;
 
     await problem.save();
     res.json(problem);
   } catch (err) {
     console.error('Error in PUT /api/admin/problems/:id:', err);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -83,7 +111,7 @@ router.delete('/:id', authMiddleware, requireAdmin, async (req, res) => {
 
     const problem = await Problem.findById(id);
     if (!problem) {
-      return res.status(404).json({ message: 'Problem not found' });
+      return res.status(404).json({ error: 'Problem not found' });
     }
 
     await TestCase.deleteMany({ problemId: problem._id });
@@ -92,11 +120,9 @@ router.delete('/:id', authMiddleware, requireAdmin, async (req, res) => {
     res.json({ message: 'Problem and its test cases deleted' });
   } catch (err) {
     console.error('Error in DELETE /api/admin/problems/:id:', err);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-// Testcase routes
 
 // GET /api/admin/problems/:id/testcases
 router.get('/:id/testcases', authMiddleware, requireAdmin, async (req, res) => {
@@ -106,7 +132,7 @@ router.get('/:id/testcases', authMiddleware, requireAdmin, async (req, res) => {
     res.json(testcases);
   } catch (err) {
     console.error('Error in GET /api/admin/problems/:id/testcases:', err);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -117,7 +143,9 @@ router.post('/:id/testcases', authMiddleware, requireAdmin, async (req, res) => 
     const { input, expectedOutput, isSample } = req.body;
 
     if (input == null || expectedOutput == null) {
-      return res.status(400).json({ message: 'input and expectedOutput are required' });
+      return res
+        .status(400)
+        .json({ error: 'input and expectedOutput are required' });
     }
 
     const tc = await TestCase.create({
@@ -130,7 +158,7 @@ router.post('/:id/testcases', authMiddleware, requireAdmin, async (req, res) => 
     res.status(201).json(tc);
   } catch (err) {
     console.error('Error in POST /api/admin/problems/:id/testcases:', err);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -142,7 +170,7 @@ router.put('/testcases/:tcId', authMiddleware, requireAdmin, async (req, res) =>
 
     const tc = await TestCase.findById(tcId);
     if (!tc) {
-      return res.status(404).json({ message: 'Testcase not found' });
+      return res.status(404).json({ error: 'Testcase not found' });
     }
 
     if (input != null) tc.input = input;
@@ -153,7 +181,7 @@ router.put('/testcases/:tcId', authMiddleware, requireAdmin, async (req, res) =>
     res.json(tc);
   } catch (err) {
     console.error('Error in PUT /api/admin/testcases/:tcId:', err);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -164,14 +192,14 @@ router.delete('/testcases/:tcId', authMiddleware, requireAdmin, async (req, res)
 
     const tc = await TestCase.findById(tcId);
     if (!tc) {
-      return res.status(404).json({ message: 'Testcase not found' });
+      return res.status(404).json({ error: 'Testcase not found' });
     }
 
     await tc.deleteOne();
     res.json({ message: 'Testcase deleted' });
   } catch (err) {
     console.error('Error in DELETE /api/admin/testcases/:tcId:', err);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

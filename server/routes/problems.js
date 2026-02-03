@@ -27,7 +27,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/problems/:code – full details for one problem
-router.get('/:code', async (req, res) => {
+router.get('/code/:code', async (req, res) => {
   try {
     const { code } = req.params;
 
@@ -42,6 +42,9 @@ router.get('/:code', async (req, res) => {
       title: problem.title,
       code: problem.code,
       statement: problem.statement,
+      statementMarkdown: problem.statementMarkdown,
+      constraintsMarkdown: problem.constraintsMarkdown,
+      editorialMarkdown: problem.editorialMarkdown,
       difficulty: problem.difficulty,
       createdAt: problem.createdAt,
     });

@@ -8,8 +8,7 @@ import ProblemsListPage from './pages/ProblemsListPage';
 import MainLayout from './layouts/MainLayout';
 import AdminProblemsPage from './pages/AdminProblemsPage';
 import AdminTestcasesPage from './pages/AdminTestcasesPage';
-import ProblemSubmissionsPage from "./pages/ProblemSubmissionsPage";
-
+import ProblemSubmissionsPage from './pages/ProblemSubmissionsPage';
 
 function App() {
   return (
@@ -23,12 +22,15 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/problems" element={<ProblemsListPage />} />
         <Route path="/problems/:code" element={<ProblemPage />} />
+        <Route
+          path="/problems/:code/submissions"
+          element={<ProblemSubmissionsPage />}
+        />
         <Route path="/profile" element={<ProfilePage />} />
 
-        {/* Admin placeholder routes - ye badme implement karuga */}
+        {/* Admin routes */}
         <Route path="/admin/problems" element={<AdminProblemsPage />} />
         <Route path="/admin/problems/:id/testcases" element={<AdminTestcasesPage />} />
-        <Route path="/problems/:code/submissions" element={<ProblemSubmissionsPage />} />
       </Route>
     </Routes>
   );
