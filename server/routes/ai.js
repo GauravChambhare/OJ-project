@@ -98,26 +98,27 @@ async function callGeminiAPI(problem, code, language, verdict) {
         throw new Error('GEMINI_API_KEY not set in environment');
     }
 
-    const prompt = `You are an expert coding tutor. Review this ${language} solution for the problem "${problem.title}".
+    const prompt = `Review this ${language} solution for "${problem.title}".
 
-**Problem Statement:**
-${problem.statementMarkdown || problem.statement}
-
-**User's Code:**
-\`\`\`${language}
-${code}
-\`\`\`
-
-**Verdict:** ${verdict}
-
-Provide a detailed review covering:
-1. **Correctness**: Is the logic correct? Any bugs?
-2. **Time Complexity**: What is the time complexity? Can it be improved?
-3. **Space Complexity**: What is the space complexity?
-4. **Code Quality**: Readability, naming, structure
-5. **Optimization Tips**: How to make it faster or cleaner?
-
-Keep it concise but helpful.`;
+    **Code:**
+    \`\`\`${language}
+    ${code}
+    \`\`\`
+    
+    **Verdict:** ${verdict}
+    
+    Provide a BRIEF review (max 150 words):
+    
+    ### Correctness
+    One sentence on logic correctness and bugs.
+    
+    ### Complexity
+    State ONLY: Time O(?), Space O(?). One improvement suggestion IF applicable.
+    
+    ### Code Quality
+    One sentence on readability/structure.
+    
+    Be concise. Skip obvious statements. Focus on actionable feedback only.`;
 
     const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,

@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
+    "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.1.18",
+    "axios": "^1.13.4",
     "katex": "^0.16.28",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

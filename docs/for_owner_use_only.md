@@ -83,6 +83,11 @@ https://stackoverflow.com/questions/69868760/m1-mac-process-keeps-autogenerating
 #### Use below command to check who is using specific port
 `lsof -i :<port no.>`
 
+#### Command for checking all installed npm packages in a dir
+`npm ls --depth=0`
+for finding transitive dependencies also we can run below command
+`npm ls`
+
 ---
 
 Ye wala samazhlo regarding ORM use case
