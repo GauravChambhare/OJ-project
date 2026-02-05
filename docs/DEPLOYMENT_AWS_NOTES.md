@@ -114,4 +114,11 @@ When I say: **“Deploy this OJ project to AWS like in Bhavesh’s video”**, I
   - Optionally, advise how to add a low-cost domain + SSL later to remove mixed-content. [page:1, {ts:1620}][page:1, {ts:1689}][page:1, {ts:1768}][page:1, {ts:3127}][page:1, {ts:5035}]
 ```
 
-If you want, I can now tailor this to your actual OJ repo (exact `Dockerfile`, ports, env variable names) so the future “deploy to AWS” instructions are 100% plug-and-play.
+---
+
+
+| Rule | Port | Source                 | Purpose      |
+| ---- | ---- | ---------------------- | ------------ |
+| SSH  | 22   | My IP[range of ip's]   | Admin access |
+| HTTP | 3000 | 0.0.0.0/0              | Server API   |
+| HTTP | 4000 | 0.0.0.0/0              | Judge API    |
